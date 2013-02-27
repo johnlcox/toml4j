@@ -15,6 +15,7 @@ import com.leacox.toml4j.node.TomlFloatNode;
 import com.leacox.toml4j.node.TomlHashNode;
 import com.leacox.toml4j.node.TomlIntegerNode;
 import com.leacox.toml4j.node.TomlNode;
+import com.leacox.toml4j.node.TomlNodeType;
 import com.leacox.toml4j.node.TomlStringNode;
 
 public class TomlParser {
@@ -139,8 +140,17 @@ public class TomlParser {
 		TomlArrayNode arrayNode = new TomlArrayNode();
 		if (value.matches(".*(?:\\]),.*")) { // Nested arrays
 			// Split with lookbehind to keep brackets
+			TomlNodeType arrayType = null;
 			for (String nestedValue : value.split("(?<=(?:\\])),")) {
 				TomlNode nestedArrayNode = parseValue(nestedValue.trim());
+				if (arrayType == null) {
+					arrayType = nestedArrayNode.getNodeType();
+				}
+
+				if (!nestedArrayNode.getNodeType().equals(arrayType)) {
+					throw new ParseException("Cannot mix data types in an array");
+				}
+
 				arrayNode.add(nestedArrayNode);
 			}
 		} else {
