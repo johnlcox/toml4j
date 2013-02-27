@@ -2,6 +2,8 @@ package com.leacox.toml4j;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,54 +31,63 @@ public class TomlParser {
 	private static final Matcher arrayValueMatcher = Pattern.compile("\\[(.*)\\]").matcher("");
 
 	public TomlNode parse(String tomlString) throws IOException {
-		TomlHashNode rootNode = new TomlHashNode();
-		// TODO: Need TomlContainerNode
-		TomlHashNode currentNode = rootNode;
 		BufferedReader reader = new BufferedReader(new StringReader(tomlString));
 		try {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				stripCommentAndWhitespace(line);
-
-				if (keyGroupExpressionMatcher.reset(line).matches()) {
-					String keyGroupPath = keyGroupExpressionMatcher.group(1);
-					currentNode = rootNode;
-					for (String keyGroup : keyGroupPath.split("\\.")) {
-						TomlNode existingNode = currentNode.get(keyGroup);
-						if (existingNode != null && !existingNode.isHash()) {
-							throw new ParseException("Duplicate key found: " + keyGroupPath);
-						}
-
-						if (existingNode == null) {
-							existingNode = new TomlHashNode();
-							currentNode.put(keyGroup, existingNode);
-						}
-
-						currentNode = (TomlHashNode) existingNode;
-					}
-				} else if (valueExpressionMatcher.reset(line).matches()) {
-					String key = valueExpressionMatcher.group(1);
-					String value = valueExpressionMatcher.group(2).trim();
-
-					if (currentNode.contains(key)) {
-						throw new ParseException("Duplicate key found");
-					}
-
-					// Parse out whole multiline array
-					if (value.startsWith("[") && !value.endsWith("]")) {
-						value = parseMultilineArray(value, reader);
-					}
-
-					currentNode.put(key, parseValue(value));
-				} else {
-					throw new ParseException("Invalid line: " + line);
-				}
-			}
-
-			return rootNode;
+			return parse(reader);
 		} finally {
 			reader.close();
 		}
+	}
+
+	public TomlNode parse(InputStream inputStream) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+		return parse(reader);
+	}
+
+	private TomlNode parse(BufferedReader reader) throws IOException {
+		TomlHashNode rootNode = new TomlHashNode();
+		// TODO: Need TomlContainerNode
+		TomlHashNode currentNode = rootNode;
+		String line;
+		while ((line = reader.readLine()) != null) {
+			stripCommentAndWhitespace(line);
+
+			if (keyGroupExpressionMatcher.reset(line).matches()) {
+				String keyGroupPath = keyGroupExpressionMatcher.group(1);
+				currentNode = rootNode;
+				for (String keyGroup : keyGroupPath.split("\\.")) {
+					TomlNode existingNode = currentNode.get(keyGroup);
+					if (existingNode != null && !existingNode.isHash()) {
+						throw new ParseException("Duplicate key found: " + keyGroupPath);
+					}
+
+					if (existingNode == null) {
+						existingNode = new TomlHashNode();
+						currentNode.put(keyGroup, existingNode);
+					}
+
+					currentNode = (TomlHashNode) existingNode;
+				}
+			} else if (valueExpressionMatcher.reset(line).matches()) {
+				String key = valueExpressionMatcher.group(1);
+				String value = valueExpressionMatcher.group(2).trim();
+
+				if (currentNode.contains(key)) {
+					throw new ParseException("Duplicate key found");
+				}
+
+				// Parse out whole multiline array
+				if (value.startsWith("[") && !value.endsWith("]")) {
+					value = parseMultilineArray(value, reader);
+				}
+
+				currentNode.put(key, parseValue(value));
+			} else {
+				throw new ParseException("Invalid line: " + line);
+			}
+		}
+
+		return rootNode;
 	}
 
 	private String parseMultilineArray(String firstLine, BufferedReader reader) throws IOException {
