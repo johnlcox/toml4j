@@ -1,6 +1,7 @@
-package com.leacox.toml4j;
+package com.leacox.toml4j.node;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class TomlHashNode extends TomlNode {
@@ -9,6 +10,11 @@ public class TomlHashNode extends TomlNode {
 	@Override
 	public TomlNodeType getNodeType() {
 		return TomlNodeType.HASH;
+	}
+
+	@Override
+	public int size() {
+		return hash.size();
 	}
 
 	public TomlHashNode put(String key, long value) {
@@ -37,5 +43,20 @@ public class TomlHashNode extends TomlNode {
 	@Override
 	public TomlNode get(String key) {
 		return hash.get(key);
+	}
+
+	@Override
+	public TomlNode get(int index) {
+		return null;
+	}
+
+	@Override
+	public Iterable<TomlNode> children() {
+		return new Iterable<TomlNode>() {
+			@Override
+			public Iterator<TomlNode> iterator() {
+				return hash.values().iterator();
+			}
+		};
 	}
 }

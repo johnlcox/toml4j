@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 /**
  * Helper class for handling ISO 8601 strings of the following format:
@@ -30,10 +31,6 @@ final class ISO8601 {
 	/** Transform ISO 8601 string to Calendar. */
 	public static Calendar toCalendar(final String iso8601String) throws ParseException {
 		Calendar calendar = GregorianCalendar.getInstance();
-		if (!(iso8601String.length() == 23 && iso8601String.endsWith("Z"))) {
-			throw new ParseException("Invalid ISO8601 String.  Must be in UTC Zulu format.", 0);
-		}
-
 		String s = iso8601String.replace("Z", "+00:00");
 		try {
 			s = s.substring(0, 22) + s.substring(23);
@@ -42,6 +39,7 @@ final class ISO8601 {
 		}
 		Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").parse(s);
 		calendar.setTime(date);
+		calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return calendar;
 	}
 }

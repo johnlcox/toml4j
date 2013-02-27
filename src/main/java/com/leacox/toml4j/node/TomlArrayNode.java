@@ -1,6 +1,7 @@
-package com.leacox.toml4j;
+package com.leacox.toml4j.node;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class TomlArrayNode extends TomlNode {
@@ -11,6 +12,11 @@ public class TomlArrayNode extends TomlNode {
 		return TomlNodeType.ARRAY;
 	}
 
+	@Override
+	public int size() {
+		return values.size();
+	}
+
 	public TomlArrayNode add(TomlNode value) {
 		if (value == null) {
 			throw new NullPointerException("value:null");
@@ -18,5 +24,20 @@ public class TomlArrayNode extends TomlNode {
 
 		values.add(value);
 		return this;
+	}
+
+	@Override
+	public Iterable<TomlNode> children() {
+		return new Iterable<TomlNode>() {
+			@Override
+			public Iterator<TomlNode> iterator() {
+				return values.iterator();
+			}
+		};
+	}
+
+	@Override
+	public TomlNode get(int index) {
+		return values.get(index);
 	}
 }

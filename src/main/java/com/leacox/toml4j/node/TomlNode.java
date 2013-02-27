@@ -1,7 +1,9 @@
-package com.leacox.toml4j;
+package com.leacox.toml4j.node;
 
 import java.util.Calendar;
 import java.util.Iterator;
+
+import com.leacox.toml4j.EmptyIterator;
 
 public abstract class TomlNode {
 	public boolean isValueNode() {
@@ -83,9 +85,25 @@ public abstract class TomlNode {
 		return get(key) != null;
 	}
 
-	public Iterator<TomlNode> fields() {
-		return EmptyIterator.getInstance();
+	public Iterable<TomlNode> children() {
+		return new Iterable<TomlNode>() {
+			@Override
+			public Iterator<TomlNode> iterator() {
+				return EmptyIterator.getInstance();
+			}
+		};
+	}
+
+	/**
+	 * Returns the number of child nodes of this node.
+	 * 
+	 * @return
+	 */
+	public int size() {
+		return 0;
 	}
 
 	public abstract TomlNodeType getNodeType();
+
+	public abstract TomlNode get(int index);
 }

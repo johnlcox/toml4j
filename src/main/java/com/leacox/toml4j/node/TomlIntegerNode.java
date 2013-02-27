@@ -1,4 +1,4 @@
-package com.leacox.toml4j;
+package com.leacox.toml4j.node;
 
 public class TomlIntegerNode extends TomlValueNode {
 	private final long value;
