@@ -25,4 +25,9 @@ public class TomlFloatNode extends TomlValueNode {
 	public double doubleValue() {
 		return value;
 	}
+
+	@Override
+	public String toString() {
+		return String.valueOf(value);
+	}
 }

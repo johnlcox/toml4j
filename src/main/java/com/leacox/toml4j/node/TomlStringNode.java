@@ -1,5 +1,7 @@
 package com.leacox.toml4j.node;
 
+import com.leacox.toml4j.StringUtils;
+
 public class TomlStringNode extends TomlValueNode {
 	private final String value;
 
@@ -19,5 +21,10 @@ public class TomlStringNode extends TomlValueNode {
 	@Override
 	public String stringValue() {
 		return value;
+	}
+
+	@Override
+	public String toString() {
+		return new StringBuilder().append("\"").append(StringUtils.escapeString(value)).append("\"").toString();
 	}
 }

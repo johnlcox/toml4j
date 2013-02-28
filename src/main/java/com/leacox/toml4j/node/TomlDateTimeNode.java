@@ -2,6 +2,8 @@ package com.leacox.toml4j.node;
 
 import java.util.Calendar;
 
+import com.leacox.toml4j.ISO8601;
+
 public class TomlDateTimeNode extends TomlValueNode {
 	private final Calendar value;
 
@@ -21,5 +23,10 @@ public class TomlDateTimeNode extends TomlValueNode {
 	@Override
 	public Calendar calendarValue() {
 		return value;
+	}
+
+	@Override
+	public String toString() {
+		return ISO8601.fromCalendar(value);
 	}
 }

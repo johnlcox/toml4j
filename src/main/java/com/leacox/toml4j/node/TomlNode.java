@@ -2,6 +2,7 @@ package com.leacox.toml4j.node;
 
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.Map;
 
 import com.leacox.toml4j.EmptyIterator;
 
@@ -94,6 +95,15 @@ public abstract class TomlNode {
 		};
 	}
 
+	public Iterable<Map.Entry<String, TomlNode>> fields() {
+		return new Iterable<Map.Entry<String, TomlNode>>() {
+			@Override
+			public Iterator<Map.Entry<String, TomlNode>> iterator() {
+				return EmptyIterator.getInstance();
+			}
+		};
+	}
+
 	/**
 	 * Returns the number of child nodes of this node.
 	 * 
@@ -106,4 +116,7 @@ public abstract class TomlNode {
 	public abstract TomlNodeType getNodeType();
 
 	public abstract TomlNode get(int index);
+
+	@Override
+	public abstract String toString();
 }

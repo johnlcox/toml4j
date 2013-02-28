@@ -1,11 +1,11 @@
 package com.leacox.toml4j.node;
 
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class TomlHashNode extends TomlNode {
-	Map<String, TomlNode> hash = new HashMap<String, TomlNode>();
+	Map<String, TomlNode> hash = new LinkedHashMap<String, TomlNode>();
 
 	@Override
 	public TomlNodeType getNodeType() {
@@ -58,5 +58,52 @@ public class TomlHashNode extends TomlNode {
 				return hash.values().iterator();
 			}
 		};
+	}
+
+	@Override
+	public Iterable<Map.Entry<String, TomlNode>> fields() {
+		return new Iterable<Map.Entry<String, TomlNode>>() {
+			@Override
+			public Iterator<Map.Entry<String, TomlNode>> iterator() {
+				return hash.entrySet().iterator();
+			}
+		};
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder hashBuilder = new StringBuilder();
+
+		for (Map.Entry<String, TomlNode> entry : hash.entrySet()) {
+			TomlNode node = entry.getValue();
+			String key = entry.getKey();
+			if (node.isValueNode() || node.isArray()) {
+				hashBuilder.append(key).append(" = ").append(node.toString()).append("\n");
+			} else {
+				hashBuilder.append(generateKeyGroups(key, node));
+			}
+		}
+
+		return hashBuilder.deleteCharAt(hashBuilder.length() - 1).toString();
+	}
+
+	private StringBuilder generateKeyGroups(String key, TomlNode node) {
+		StringBuilder keyGroupBuilder = new StringBuilder();
+		TomlNode currentNode = node;
+		if (currentNode.isHash()) {
+			keyGroupBuilder.append("[").append(key).append("]").append("\n");
+			for (Map.Entry<String, TomlNode> child : node.fields()) {
+				String childKey = child.getKey();
+				TomlNode childNode = child.getValue();
+
+				if (childNode.isValueNode() || childNode.isArray()) {
+					keyGroupBuilder.append(childKey).append(" = ").append(childNode.toString()).append("\n");
+				} else {
+					keyGroupBuilder.append(generateKeyGroups(key + "." + childKey, childNode));
+				}
+			}
+		}
+
+		return keyGroupBuilder;
 	}
 }

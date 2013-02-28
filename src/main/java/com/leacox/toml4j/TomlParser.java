@@ -19,7 +19,7 @@ import com.leacox.toml4j.node.TomlNodeType;
 import com.leacox.toml4j.node.TomlStringNode;
 
 public class TomlParser {
-	private static final Matcher commentMatcher = Pattern.compile("#.*").matcher("");
+	private static final Matcher commentMatcher = Pattern.compile("(#.*)").matcher("");
 	private static final Matcher keyGroupExpressionMatcher = Pattern.compile("\\[(\\w+(\\.\\w+)*)]").matcher("");
 	private static final Matcher valueExpressionMatcher = Pattern.compile("([^\\s]\\w+)\\s*=(.+)").matcher("");
 
@@ -51,7 +51,10 @@ public class TomlParser {
 		TomlHashNode currentNode = rootNode;
 		String line;
 		while ((line = reader.readLine()) != null) {
-			stripCommentAndWhitespace(line);
+			line = stripCommentAndWhitespace(line);
+			if (line.equals("")) {
+				continue;
+			}
 
 			if (keyGroupExpressionMatcher.reset(line).matches()) {
 				String keyGroupPath = keyGroupExpressionMatcher.group(1);
@@ -163,8 +166,8 @@ public class TomlParser {
 		return arrayNode;
 	}
 
-	private void stripCommentAndWhitespace(String line) {
-		commentMatcher.reset(line).replaceAll("").trim();
+	private String stripCommentAndWhitespace(String line) {
+		return commentMatcher.reset(line).replaceAll("").trim();
 	}
 
 	private String unescapeString(String value) {

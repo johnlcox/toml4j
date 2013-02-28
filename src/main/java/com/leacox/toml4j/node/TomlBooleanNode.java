@@ -20,4 +20,9 @@ public class TomlBooleanNode extends TomlValueNode {
 	public boolean booleanValue() {
 		return value;
 	}
+
+	@Override
+	public String toString() {
+		return String.valueOf(value);
+	}
 }

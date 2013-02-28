@@ -40,4 +40,22 @@ public class TomlArrayNode extends TomlNode {
 	public TomlNode get(int index) {
 		return values.get(index);
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder arrayBuilder = new StringBuilder();
+
+		arrayBuilder.append("[");
+		Iterator<TomlNode> i = values.iterator();
+		for (;;) {
+			arrayBuilder.append(i.next().toString());
+			if (!i.hasNext()) {
+				break;
+			}
+			arrayBuilder.append(", ");
+		}
+		arrayBuilder.append("]");
+
+		return arrayBuilder.toString();
+	}
 }
