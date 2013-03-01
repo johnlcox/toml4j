@@ -42,6 +42,10 @@ boolean isDbEnabled = toml.getBoolean("database.enabled");
 String serverIp = toml.getStringValue("server.alpha.ip");
 ```
 
+## TODO
+* Add Object Mapping support. Preferably without a large dependency like jackson/gson.  Perhaps Dozer would work.
+* Add Nested list support to the key/value approach via something like guava's `TypeToken`
+
 ## License
 
 Copyright 2013 John Leacox
