@@ -42,6 +42,11 @@ public class Toml {
 
 	public String getString(String key) {
 		TomlNode stringNode = get(key);
+
+		if (stringNode == null) {
+			return null;
+		}
+
 		if (!stringNode.isString()) {
 			throw new IllegalArgumentException("Matching value of key '" + key + "' is not a String");
 		}
@@ -51,6 +56,11 @@ public class Toml {
 
 	public Long getLong(String key) {
 		TomlNode integerNode = get(key);
+
+		if (integerNode == null) {
+			return null;
+		}
+
 		if (!integerNode.isInteger()) {
 			throw new IllegalArgumentException("Matching value of key '" + key + "' is not an Integer");
 		}
@@ -60,6 +70,11 @@ public class Toml {
 
 	public Double getDouble(String key) {
 		TomlNode doubleNode = get(key);
+
+		if (doubleNode == null) {
+			return null;
+		}
+
 		if (!doubleNode.isFloat()) {
 			throw new IllegalArgumentException("Matching value of key '" + key + "' is not a Double");
 		}
@@ -69,6 +84,11 @@ public class Toml {
 
 	public Boolean getBoolean(String key) {
 		TomlNode booleanNode = get(key);
+
+		if (booleanNode == null) {
+			return null;
+		}
+
 		if (!booleanNode.isBoolean()) {
 			throw new IllegalArgumentException("Matching value of key '" + key + "' is not a Boolean");
 		}
@@ -78,6 +98,11 @@ public class Toml {
 
 	public Calendar getCalendar(String key) {
 		TomlNode calendarNode = get(key);
+
+		if (calendarNode == null) {
+			return null;
+		}
+
 		if (!calendarNode.isDateTime()) {
 			throw new IllegalArgumentException("Matching value of key '" + key + "' is not a Calendar");
 		}
@@ -89,6 +114,11 @@ public class Toml {
 	// guavas TypeToken
 	public <T> List<T> getListOf(String key, Class<T> type) {
 		TomlNode arrayNode = get(key);
+
+		if (arrayNode == null) {
+			return null;
+		}
+
 		if (!arrayNode.isArray()) {
 			throw new IllegalArgumentException("Matching value of key '" + key + "' is not an Array");
 		}
@@ -125,6 +155,20 @@ public class Toml {
 		return list;
 	}
 
+	public Toml getKeyGroup(String keyGroup) {
+		TomlNode keyGroupNode = get(keyGroup);
+
+		if (keyGroupNode == null) {
+			return null;
+		}
+
+		if (!keyGroupNode.isHash()) {
+			throw new IllegalArgumentException("Invalid keygroup: " + keyGroup);
+		}
+
+		return new Toml(keyGroupNode);
+	}
+
 	private TomlNode get(String key) {
 		TomlNode foundNode = null;
 		if (key.contains(".")) {
@@ -142,12 +186,6 @@ public class Toml {
 			foundNode = rootNode.get(key);
 		}
 
-		if (foundNode == null) {
-			throw new IllegalArgumentException("Unknown key");
-		}
-
 		return foundNode;
 	}
-
-	// public <T> T readValue(String key, Class<T> type);
 }
