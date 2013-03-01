@@ -19,9 +19,9 @@ import com.leacox.toml4j.node.TomlNodeType;
 import com.leacox.toml4j.node.TomlStringNode;
 
 public class TomlParser {
-	private static final Matcher commentMatcher = Pattern.compile("(#.*)").matcher("");
-	private static final Matcher keyGroupExpressionMatcher = Pattern.compile("\\[(\\w+(\\.\\w+)*)]").matcher("");
-	private static final Matcher valueExpressionMatcher = Pattern.compile("([^\\s]\\w+)\\s*=(.+)").matcher("");
+	private static final Matcher keyGroupExpressionMatcher = Pattern
+			.compile("\\[([\\w:.,?!@#]+(\\.\\[\\w:.,?!@#]+)*)]").matcher("");
+	private static final Matcher valueExpressionMatcher = Pattern.compile("([^\\s][\\w:.,?!@#]+)\\s*=(.+)").matcher("");
 
 	private static final Matcher stringValueMatcher = Pattern.compile("^\".*\"$").matcher("");
 	private static final Matcher integerValueMatcher = Pattern.compile("^-?\\d+$").matcher("");
@@ -99,6 +99,10 @@ public class TomlParser {
 		boolean arrayEndingFound = false;
 		String line;
 		while ((line = reader.readLine()) != null) {
+			line = stripCommentAndWhitespace(line);
+			if (line.equals("")) {
+				continue;
+			}
 			singleLineArrayBuilder.append(line);
 
 			if (line.endsWith("]")) {
@@ -166,8 +170,31 @@ public class TomlParser {
 		return arrayNode;
 	}
 
+	// TODO: A key could probably have a '#' too.
 	private String stripCommentAndWhitespace(String line) {
-		return commentMatcher.reset(line).replaceAll("").trim();
+		String temp = line.trim();
+		boolean inKeyGroup = false;
+		boolean inString = false;
+		for (int i = 0; i < temp.length(); i++) {
+			char ch = temp.charAt(i);
+			if (ch == '\"' && !inString) {
+				inString = true;
+			} else if (inString && ch == '\"' && i > 0 && temp.charAt(i - 1) != '\\') {
+				inString = false;
+			} else if (ch == '[' && !inKeyGroup) {
+				inKeyGroup = true;
+			} else if (inKeyGroup && ch == ']') {
+				inKeyGroup = false;
+			}
+
+			if (!inKeyGroup && !inString && ch == '#') {
+				temp = temp.substring(0, i);
+				break;
+			}
+		}
+
+		return temp;
+		// return commentMatcher.reset(line).replaceAll("").trim();
 	}
 
 	private String unescapeString(String value) {
