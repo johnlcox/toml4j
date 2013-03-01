@@ -6,25 +6,40 @@ A Java parser for [toml](https://github.com/mojombo/toml) files, obviously based
 
 ## Usage
 
-```toml
-# config.toml
-name = "awesome service"
+Use the `TomlParser` to parse a TOML file or string.  The parsed result can be consumed in two ways.
 
-[server]
-ip = "192.168.0.1"
-port = 12000
-```
+### Tree Based
+
+With the tree based approach it is possible to easily traverse a TOML structure that is not known a priori.
 
 ```java
 InputStream tomlInpuStream = new FileInputStream("config.toml");
-TomlParser tomlParser = new TomlParser();
-TomlNode tomlNode = tomlParser.parse(tomlInputStream);
+TomlNode tomlNode = new TomlParser().parse(tomlInputStream);
 
 String serviceName = tomlNode.get("name").stringValue();
 
-TomlNode serverNode = tomlNode.get("server");
+TomlNode databaseNode = tomlNode.get("database");
+String dbServer = serverNode.get("server").stringValue();
+boolean isDbEnabled = serverNode.get("enabled").booleanValue();
+
+TomlNode serverNode = tomlNode.get("servers").get("alpha");
 String serverIp = serverNode.get("ip").stringValue();
-long serverPort = serverNode.get("port").longValue();
+```
+
+### Key/Value Based
+
+If the TOML structure is already known, the key/value approach is a simple abstraction of the TOML tree with easy key based accessors.
+
+```java
+InputStream tomlInpuStream = new FileInputStream("config.toml");
+Toml toml = new Toml(new TomlParser().parse(tomlInputStream));
+
+String serviceName = toml.getString("name");
+
+String dbServer = toml.getString("database.server");
+boolean isDbEnabled = toml.getBoolean("database.enabled");
+
+String serverIp = toml.getStringValue("server.alpha.ip");
 ```
 
 ## License
