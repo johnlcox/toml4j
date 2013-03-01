@@ -21,7 +21,7 @@ String serviceName = toml.getString("name");
 String dbServer = toml.getString("database.server");
 boolean isDbEnabled = toml.getBoolean("database.enabled");
 
-String serverIp = toml.getStringValue("server.alpha.ip");
+String serverIp = toml.getString("server.alpha.ip");
 ```
 
 ### Tree Based
