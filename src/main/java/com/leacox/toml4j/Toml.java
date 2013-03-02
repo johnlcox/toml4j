@@ -55,6 +55,16 @@ public class Toml {
 		return stringNode.stringValue();
 	}
 
+	public String getAsString(String key) {
+		TomlNode valueNode = get(key);
+
+		if (valueNode == null) {
+			return null;
+		}
+
+		return valueNode.asStringValue();
+	}
+
 	public Long getLong(String key) {
 		TomlNode integerNode = get(key);
 

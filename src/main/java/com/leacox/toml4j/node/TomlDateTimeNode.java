@@ -26,6 +26,11 @@ public class TomlDateTimeNode extends TomlValueNode {
 	}
 
 	@Override
+	public String asStringValue() {
+		return ISO8601.fromCalendar(value);
+	}
+
+	@Override
 	public String toString() {
 		return ISO8601.fromCalendar(value);
 	}

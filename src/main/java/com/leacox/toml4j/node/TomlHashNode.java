@@ -51,6 +51,11 @@ public class TomlHashNode extends TomlNode {
 	}
 
 	@Override
+	public String asStringValue() {
+		return "";
+	}
+
+	@Override
 	public Iterable<TomlNode> children() {
 		return new Iterable<TomlNode>() {
 			@Override

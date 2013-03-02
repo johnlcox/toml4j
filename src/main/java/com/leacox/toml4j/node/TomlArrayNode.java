@@ -42,6 +42,11 @@ public class TomlArrayNode extends TomlNode {
 	}
 
 	@Override
+	public String asStringValue() {
+		return "";
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder arrayBuilder = new StringBuilder();
 

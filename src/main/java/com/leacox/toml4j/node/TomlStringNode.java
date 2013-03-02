@@ -24,6 +24,11 @@ public class TomlStringNode extends TomlValueNode {
 	}
 
 	@Override
+	public String asStringValue() {
+		return value;
+	}
+
+	@Override
 	public String toString() {
 		return new StringBuilder().append("\"").append(StringUtils.escapeString(value)).append("\"").toString();
 	}

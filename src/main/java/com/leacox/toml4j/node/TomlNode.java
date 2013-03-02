@@ -119,4 +119,6 @@ public abstract class TomlNode {
 
 	@Override
 	public abstract String toString();
+
+	public abstract String asStringValue();
 }
