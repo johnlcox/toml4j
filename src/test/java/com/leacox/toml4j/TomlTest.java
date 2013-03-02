@@ -193,4 +193,26 @@ public class TomlTest {
 
 		assertNull(toml.getListOf("missingarray", Long.class));
 	}
+
+	@Test
+	public void testGetListOfList() throws IOException {
+		String tomlString = "superarray = [[1, 2, 3], [\"one\", \"two\", \"three\"]]";
+
+		Toml toml = Toml.from(tomlString);
+
+		@SuppressWarnings("rawtypes")
+		List<List> superarray = toml.getListOf("superarray", List.class);
+
+		List<Long> intList = superarray.get(0);
+		assertEquals(3, intList.size());
+		assertEquals(1, intList.get(0).longValue());
+		assertEquals(2, intList.get(1).longValue());
+		assertEquals(3, intList.get(2).longValue());
+
+		List<String> stringList = superarray.get(1);
+		assertEquals(3, stringList.size());
+		assertEquals("one", stringList.get(0));
+		assertEquals("two", stringList.get(1));
+		assertEquals("three", stringList.get(2));
+	}
 }

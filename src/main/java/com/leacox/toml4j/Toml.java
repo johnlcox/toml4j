@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import com.leacox.toml4j.node.TomlArrayNode;
 import com.leacox.toml4j.node.TomlNode;
 
 public class Toml {
@@ -110,8 +111,10 @@ public class Toml {
 		return calendarNode.calendarValue();
 	}
 
-	// TODO: This won't support nested lists. Probably need something like
-	// guavas TypeToken
+	public List<Object> getList(String key) {
+		return getListOf(key, Object.class);
+	}
+
 	public <T> List<T> getListOf(String key, Class<T> type) {
 		TomlNode arrayNode = get(key);
 
@@ -125,28 +128,8 @@ public class Toml {
 
 		List<T> list = new ArrayList<T>(arrayNode.size());
 		for (TomlNode arrayValueNode : arrayNode.children()) {
-			Object value = null;
-			switch (arrayValueNode.getNodeType()) {
-			case STRING:
-				value = arrayValueNode.stringValue();
-				break;
-			case INTEGER:
-				value = arrayValueNode.longValue();
-				break;
-			case FLOAT:
-				value = arrayValueNode.doubleValue();
-				break;
-			case BOOLEAN:
-				value = arrayValueNode.booleanValue();
-				break;
-			case DATETIME:
-				value = arrayValueNode.calendarValue();
-				break;
-			default:
-				throw new IllegalArgumentException("Value of key '" + key + "' does not match type '" + type + "'");
-			}
 			try {
-				list.add(type.cast(value));
+				list.add(type.cast(getValue(arrayValueNode)));
 			} catch (ClassCastException e) {
 				throw new IllegalArgumentException("Value of key '" + key + "' does not match type '" + type + "'");
 			}
@@ -187,5 +170,44 @@ public class Toml {
 		}
 
 		return foundNode;
+	}
+
+	private List<Object> getAsList(TomlNode node) {
+		TomlArrayNode arrayNode = (TomlArrayNode) node;
+
+		List<Object> list = new ArrayList<Object>();
+		for (TomlNode arrayValueNode : arrayNode.children()) {
+			list.add(getValue(arrayValueNode));
+		}
+
+		return list;
+	}
+
+	private Object getValue(TomlNode valueNode) {
+		Object value = null;
+		switch (valueNode.getNodeType()) {
+		case STRING:
+			value = valueNode.stringValue();
+			break;
+		case INTEGER:
+			value = valueNode.longValue();
+			break;
+		case FLOAT:
+			value = valueNode.doubleValue();
+			break;
+		case BOOLEAN:
+			value = valueNode.booleanValue();
+			break;
+		case DATETIME:
+			value = valueNode.calendarValue();
+			break;
+		case ARRAY:
+			value = getAsList(valueNode);
+			break;
+		default:
+			throw new IllegalStateException("Invalid value node type: '" + valueNode.getNodeType() + "'");
+		}
+
+		return value;
 	}
 }
