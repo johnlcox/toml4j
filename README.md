@@ -14,7 +14,7 @@ If the TOML structure is already known, the key/value approach is a simple abstr
 
 ```java
 InputStream tomlInpuStream = new FileInputStream("config.toml");
-Toml toml = new Toml(new TomlParser().parse(tomlInputStream));
+Toml toml = Toml.from(new FileInputStream("config.toml"));
 
 String serviceName = toml.getString("name");
 
@@ -41,10 +41,6 @@ boolean isDbEnabled = serverNode.get("enabled").booleanValue();
 TomlNode serverNode = tomlNode.get("servers").get("alpha");
 String serverIp = serverNode.get("ip").stringValue();
 ```
-
-## TODO
-* Add Object Mapping support. Preferably without a large dependency like jackson/gson.  Perhaps Dozer would work.
-* Add Nested list support to the key/value approach via something like guava's `TypeToken`
 
 ## License
 
