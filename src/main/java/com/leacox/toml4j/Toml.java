@@ -1,7 +1,9 @@
 package com.leacox.toml4j;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -39,6 +41,22 @@ public class Toml {
 
 		TomlNode tomlNode = new TomlParser().parse(tomlString);
 		return new Toml(tomlNode);
+	}
+
+	public void writeTo(File file) throws IOException {
+		if (file == null) {
+			throw new NullPointerException("file: null");
+		}
+
+		new TomlGenerator().writeTo(file, rootNode);
+	}
+
+	public void writeTo(OutputStream outputStream) throws IOException {
+		if (outputStream == null) {
+			throw new NullPointerException("outpuStream: null");
+		}
+
+		new TomlGenerator().writeTo(outputStream, rootNode);
 	}
 
 	public String getString(String key) {
