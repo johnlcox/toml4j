@@ -1,6 +1,6 @@
 # toml4j
 
-[![Build Status](https://travis-ci.org/johnlcox/toml4j.png)](https://travis-ci.org/johnlcox/toml4j)
+[![Build Status](https://travis-ci.org/johnlcox/toml4j.png?branch=master)](https://travis-ci.org/johnlcox/toml4j)
 
 A Java parser for [toml](https://github.com/mojombo/toml) files, based heavily on the jackson databind node API.  The parse result is a navigable tree of nodes.
 
