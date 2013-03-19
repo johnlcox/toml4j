@@ -161,8 +161,17 @@ public class TomlParser {
 				arrayNode.add(nestedArrayNode);
 			}
 		} else {
+			TomlNodeType arrayType = null;
 			for (String arrayValue : value.split("\\,")) {
 				TomlNode arrayValueNode = parseValue(arrayValue.trim());
+				if (arrayType == null) {
+					arrayType = arrayValueNode.getNodeType();
+				}
+
+				if (!arrayValueNode.getNodeType().equals(arrayType)) {
+					throw new ParseException("Cannot mix data types in an array");
+				}
+
 				arrayNode.add(arrayValueNode);
 			}
 		}

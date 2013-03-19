@@ -229,6 +229,14 @@ public class TomlParserTest {
 		assertEquals(3, array.get(2).longValue());
 	}
 
+	@Test(expected = ParseException.class)
+	public void testArrayWithIntegerAndFloatIsInvalid() throws IOException {
+		String tomlString = "array = [1, 2.0]";
+
+		TomlParser parser = new TomlParser();
+		parser.parse(tomlString);
+	}
+
 	@Test
 	public void testMultilineArray() throws IOException {
 		String tomlString = "array = [\n1 , \n2,\n 3,4]";
