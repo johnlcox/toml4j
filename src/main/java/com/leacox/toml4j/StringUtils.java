@@ -6,14 +6,17 @@ public class StringUtils {
 		for (int i = 0; i < value.length(); i++) {
 			char character = value.charAt(i);
 			switch (character) {
-			case '\u0000':
-				unescapedStringBuilder.append("\\0");
+			case '\u0008':
+				unescapedStringBuilder.append("\\b");
 				break;
 			case '\t':
 				unescapedStringBuilder.append("\\t");
 				break;
 			case '\n':
 				unescapedStringBuilder.append("\\n");
+				break;
+			case '\f':
+				unescapedStringBuilder.append("\\f");
 				break;
 			case '\r':
 				unescapedStringBuilder.append("\\r");
