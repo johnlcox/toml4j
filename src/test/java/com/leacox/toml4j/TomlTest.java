@@ -203,12 +203,14 @@ public class TomlTest {
 		@SuppressWarnings("rawtypes")
 		List<List> superarray = toml.getListOf("superarray", List.class);
 
+		@SuppressWarnings("unchecked")
 		List<Long> intList = superarray.get(0);
 		assertEquals(3, intList.size());
 		assertEquals(1, intList.get(0).longValue());
 		assertEquals(2, intList.get(1).longValue());
 		assertEquals(3, intList.get(2).longValue());
 
+		@SuppressWarnings("unchecked")
 		List<String> stringList = superarray.get(1);
 		assertEquals(3, stringList.size());
 		assertEquals("one", stringList.get(0));

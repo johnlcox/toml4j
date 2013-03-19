@@ -37,13 +37,13 @@ public class TomlParserTest {
 	}
 
 	@Test
-	public void testStringValueNullCharacter() throws IOException {
-		String tomlString = "mystring = \"This is a string with null: \\0\"";
+	public void testStringValueBackspaceCharacter() throws IOException {
+		String tomlString = "mystring = \"This is a string with backspace: \\b\"";
 
 		TomlParser parser = new TomlParser();
 		TomlNode tomlNode = parser.parse(tomlString);
 
-		assertEquals("This is a string with null: \0", tomlNode.get("mystring").stringValue());
+		assertEquals("This is a string with backspace: \b", tomlNode.get("mystring").stringValue());
 	}
 
 	@Test
@@ -57,13 +57,23 @@ public class TomlParserTest {
 	}
 
 	@Test
-	public void testStringValueNewlineCharacter() throws IOException {
-		String tomlString = "mystring = \"This is a string with newline: \\n\"";
+	public void testStringValueLineFeedCharacter() throws IOException {
+		String tomlString = "mystring = \"This is a string with linefeed: \\n\"";
 
 		TomlParser parser = new TomlParser();
 		TomlNode tomlNode = parser.parse(tomlString);
 
-		assertEquals("This is a string with newline: \n", tomlNode.get("mystring").stringValue());
+		assertEquals("This is a string with linefeed: \n", tomlNode.get("mystring").stringValue());
+	}
+
+	@Test
+	public void testStringValueFormFeedCharacter() throws IOException {
+		String tomlString = "mystring = \"This is a string with form feed: \\f\"";
+
+		TomlParser parser = new TomlParser();
+		TomlNode tomlNode = parser.parse(tomlString);
+
+		assertEquals("This is a string with form feed: \f", tomlNode.get("mystring").stringValue());
 	}
 
 	@Test
@@ -74,6 +84,16 @@ public class TomlParserTest {
 		TomlNode tomlNode = parser.parse(tomlString);
 
 		assertEquals("This is a string with carriage return: \r", tomlNode.get("mystring").stringValue());
+	}
+
+	@Test
+	public void testStringValueSlashCharacter() throws IOException {
+		String tomlString = "mystring = \"This is a string with a slash (optional to escape): \\/\"";
+
+		TomlParser parser = new TomlParser();
+		TomlNode tomlNode = parser.parse(tomlString);
+
+		assertEquals("This is a string with a slash (optional to escape): /", tomlNode.get("mystring").stringValue());
 	}
 
 	@Test
@@ -94,6 +114,17 @@ public class TomlParserTest {
 		TomlNode tomlNode = parser.parse(tomlString);
 
 		assertEquals("This is a string with backslash: \\", tomlNode.get("mystring").stringValue());
+	}
+
+	@Test
+	public void testStringValueBasicUnicode() throws IOException {
+		String tomlString = "mystring = \"I'm a string. \\\"You can quote me\\\". Name\\tJos\\u00E9\\nLocation\\tSF.\"";
+
+		TomlParser parser = new TomlParser();
+		TomlNode tomlNode = parser.parse(tomlString);
+
+		assertEquals("I'm a string. \"You can quote me\". Name\tJosé\nLocation\tSF.", tomlNode.get("mystring")
+				.stringValue());
 	}
 
 	@Test

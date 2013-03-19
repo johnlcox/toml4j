@@ -42,8 +42,8 @@ public class StringUtils {
 				if (i < value.length()) {
 					character = value.charAt(i);
 					switch (character) {
-					case '0':
-						unescapedStringBuilder.append('\u0000');
+					case 'b':
+						unescapedStringBuilder.append('\u0008');
 						break;
 					case 't':
 						unescapedStringBuilder.append('\t');
@@ -51,14 +51,30 @@ public class StringUtils {
 					case 'n':
 						unescapedStringBuilder.append('\n');
 						break;
+					case 'f':
+						unescapedStringBuilder.append('\f');
+						break;
 					case 'r':
 						unescapedStringBuilder.append('\r');
 						break;
 					case '"':
 						unescapedStringBuilder.append('\"');
 						break;
+					case '/':
+						unescapedStringBuilder.append('/');
+						break;
 					case '\\':
 						unescapedStringBuilder.append('\\');
+						break;
+					case 'u':
+						i++; // Advance to the start of the unicode code point.
+						int codePoint = readUnicodeCodePoint(value, i);
+						if (Character.isISOControl(codePoint)) {
+							throw new ParseException(
+									"String value contains invalid unicode characters (control characters): " + value);
+						}
+						unescapedStringBuilder.append(Character.toChars(codePoint));
+						i += 3; // Advance to the end of the unicode code point.
 						break;
 					default:
 						throw new ParseException("String value contains an invalid escape sequence: " + value);
@@ -72,5 +88,10 @@ public class StringUtils {
 		}
 
 		return unescapedStringBuilder.toString();
+	}
+
+	private static int readUnicodeCodePoint(String value, int startIndex) {
+		String hexValue = value.substring(startIndex, startIndex + 4);
+		return Integer.parseInt(hexValue, 16);
 	}
 }
