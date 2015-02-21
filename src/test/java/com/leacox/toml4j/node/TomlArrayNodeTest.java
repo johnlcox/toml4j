@@ -2,26 +2,20 @@ package com.leacox.toml4j.node;
 
 import static org.junit.Assert.assertEquals;
 
-import com.leacox.toml4j.ISO8601;
-
 import org.junit.Test;
 
 import java.text.ParseException;
-import java.util.Calendar;
 
 public class TomlArrayNodeTest {
   @Test
   public void testToStringDate() throws ParseException {
-    Calendar date1 = ISO8601.toCalendar("1979-05-27T07:32:12Z");
-    Calendar date2 = ISO8601.toCalendar("1980-09-27T02:47:12Z");
-    Calendar date3 = ISO8601.toCalendar("1981-02-27T20:32:00Z");
-
     TomlArrayNode array = new TomlArrayNode();
-    array.add(new TomlDateTimeNode(date1));
-    array.add(new TomlDateTimeNode(date2));
-    array.add(new TomlDateTimeNode(date3));
+    array.add(TomlDateTimeNode.valueOf("1979-05-27T07:32:12-08:00"));
+    array.add(TomlDateTimeNode.valueOf("1980-09-27T02:47:12Z"));
+    array.add(TomlDateTimeNode.valueOf("1981-02-27T20:32:00Z"));
 
     assertEquals(
-        "[1979-05-27T07:32:12Z, 1980-09-27T02:47:12Z, 1981-02-27T20:32:00Z]", array.toString());
+        "[1979-05-27T07:32:12-08:00, 1980-09-27T02:47:12Z, 1981-02-27T20:32:00Z]",
+        array.toString());
   }
 }

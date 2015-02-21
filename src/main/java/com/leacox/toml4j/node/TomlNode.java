@@ -2,7 +2,8 @@ package com.leacox.toml4j.node;
 
 import com.leacox.toml4j.EmptyIterator;
 
-import java.util.Calendar;
+import org.joda.time.DateTime;
+
 import java.util.Iterator;
 import java.util.Map;
 
@@ -32,6 +33,10 @@ public abstract class TomlNode {
 
   public boolean isArray() {
     return getNodeType() == TomlNodeType.ARRAY;
+  }
+
+  public boolean isArrayOfTables() {
+    return getNodeType() == TomlNodeType.ARRAY_OF_TABLES;
   }
 
   public boolean isHash() {
@@ -70,7 +75,7 @@ public abstract class TomlNode {
     return 0.0;
   }
 
-  public Calendar calendarValue() {
+  public DateTime dateTimeValue() {
     return null;
   }
 

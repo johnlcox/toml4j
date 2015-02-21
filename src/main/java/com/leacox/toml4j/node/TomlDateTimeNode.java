@@ -1,18 +1,27 @@
 package com.leacox.toml4j.node;
 
-import com.leacox.toml4j.ISO8601;
+import com.leacox.toml4j.ParseException;
 
-import java.util.Calendar;
+import org.joda.time.DateTime;
 
 public class TomlDateTimeNode extends TomlValueNode {
-  private final Calendar value;
+  private final String value;
 
-  public TomlDateTimeNode(Calendar value) {
+  public TomlDateTimeNode(String value) {
+    try {
+      parse(value);
+    } catch (IllegalArgumentException e) {
+      throw new ParseException("Invalid date value: " + value);
+    }
     this.value = value;
   }
 
-  public static TomlDateTimeNode valueOf(Calendar value) {
+  public static TomlDateTimeNode valueOf(String value) {
     return new TomlDateTimeNode(value);
+  }
+
+  private DateTime parse(String value) {
+    return DateTime.parse(value);
   }
 
   @Override
@@ -21,17 +30,17 @@ public class TomlDateTimeNode extends TomlValueNode {
   }
 
   @Override
-  public Calendar calendarValue() {
-    return value;
+  public DateTime dateTimeValue() {
+    return parse(value);
   }
 
   @Override
   public String asStringValue() {
-    return ISO8601.fromCalendar(value);
+    return value;
   }
 
   @Override
   public String toString() {
-    return ISO8601.fromCalendar(value);
+    return value;
   }
 }

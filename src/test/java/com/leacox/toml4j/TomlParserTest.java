@@ -7,12 +7,11 @@ import static org.junit.Assert.fail;
 
 import com.leacox.toml4j.node.TomlNode;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
 
 public class TomlParserTest {
   @Test
@@ -194,13 +193,12 @@ public class TomlParserTest {
     TomlParser parser = new TomlParser();
     TomlNode tomlNode = parser.parse(tomlString);
 
-    Calendar dob = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
-    dob.clear(); // Clear millis
-    dob.set(1979, 4, 27, 7, 32, 12);
+    DateTime dob = DateTime.parse("1979-05-27T07:32:12Z");
 
-    Calendar tomlCalendar = tomlNode.get("dob").calendarValue();
-    assertEquals(dob.getTimeZone(), tomlCalendar.getTimeZone());
-    assertEquals(dob.getTimeInMillis(), tomlCalendar.getTimeInMillis());
+    DateTime dateTime = tomlNode.get("dob").dateTimeValue();
+
+    assertEquals(dob, dateTime);
+    assertEquals(DateTimeZone.UTC, dob.getZone());
   }
 
   @Test

@@ -6,13 +6,13 @@ import static org.junit.Assert.assertNull;
 
 import com.leacox.toml4j.node.TomlNode;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.TimeZone;
+import java.util.Map;
 
 public class TomlTest {
   @Test
@@ -112,7 +112,7 @@ public class TomlTest {
   }
 
   @Test
-  public void testGetCalendar() throws IOException {
+  public void testGetDateTime() throws IOException {
     String tomlString = "dob =  1979-05-27T07:32:12Z";
 
     TomlParser parser = new TomlParser();
@@ -120,18 +120,16 @@ public class TomlTest {
 
     Toml toml = Toml.from(tomlNode);
 
-    Calendar dob = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
-    dob.clear(); // Clear millis
-    dob.set(1979, 4, 27, 7, 32, 12);
+    DateTime dob = DateTime.parse("1979-05-27T07:32:12Z");
 
-    Calendar tomlCalendar = toml.getCalendar("dob");
+    DateTime dateTime = toml.getDateTime("dob");
 
-    assertEquals(dob.getTimeZone(), tomlCalendar.getTimeZone());
-    assertEquals(dob.getTimeInMillis(), tomlCalendar.getTimeInMillis());
+    assertEquals(dob, dateTime);
+    assertEquals(DateTimeZone.UTC, dob.getZone());
   }
 
   @Test
-  public void testGetCalendarReturnsNullForMissingKey() throws IOException {
+  public void testGetDateTimeReturnsNullForMissingKey() throws IOException {
     String tomlString = "dob =  1979-05-27T07:32:12Z";
 
     TomlParser parser = new TomlParser();
@@ -139,7 +137,24 @@ public class TomlTest {
 
     Toml toml = Toml.from(tomlNode);
 
-    assertNull(toml.getCalendar("amissingcalendar"));
+    assertNull(toml.getDateTime("amissingdatetime"));
+  }
+
+  @Test
+  public void testGetDateTimerWithTimezoneOffset() throws IOException {
+    String tomlString = "dob=1979-05-27T07:32:00-08:00";
+
+    TomlParser parser = new TomlParser();
+    TomlNode tomlNode = parser.parse(tomlString);
+
+    Toml toml = Toml.from(tomlNode);
+
+    DateTime dob = DateTime.parse("1979-05-27T07:32:00-08:00");
+
+    DateTime dateTime = toml.getDateTime("dob");
+
+    assertEquals(dob, dateTime);
+    assertEquals(DateTimeZone.forOffsetHours(-8), dob.getZone());
   }
 
   @Test
@@ -216,5 +231,34 @@ public class TomlTest {
     assertEquals("one", stringList.get(0));
     assertEquals("two", stringList.get(1));
     assertEquals("three", stringList.get(2));
+  }
+
+  @Test
+  public void testGetListOfMap() throws Exception {
+    Toml toml = Toml.from(
+        "[[products]]\n"
+            + "name = \"Hammer\"\n"
+            + "sku = 738594937\n"
+            + "\n"
+            + "[[products]]\n"
+            + "\n"
+            + "[[products]]\n"
+            + "name = \"Nail\"\n"
+            + "sku = 284758393\n"
+            + "color = \"gray\"");
+
+    List<Map> products = toml.getListOf("products", Map.class);
+
+    assertEquals(3, products.size());
+
+    assertEquals("Hammer", products.get(0).get("name"));
+    assertEquals(738594937L, products.get(0).get("sku"));
+
+    assertNull(products.get(1).get("name"));
+    assertNull(products.get(1).get("sku"));
+
+    assertEquals("Nail", products.get(2).get("name"));
+    assertEquals(284758393L, products.get(2).get("sku"));
+    assertEquals("gray", products.get(2).get("color"));
   }
 }

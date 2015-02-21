@@ -9,6 +9,7 @@ import com.leacox.toml4j.node.TomlIntegerNode;
 import com.leacox.toml4j.node.TomlNode;
 import com.leacox.toml4j.node.TomlNodeType;
 import com.leacox.toml4j.node.TomlStringNode;
+import com.leacox.toml4j.node.TomlTableArrayNode;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,17 +20,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TomlParser {
-  private static final Matcher keyGroupExpressionMatcher = Pattern
-      .compile("\\[([\\w:.,?!@#]+(\\.\\[\\w:.,?!@#]+)*)]").matcher("");
+  private static final Matcher tableExpressionMatcher = Pattern
+      .compile("\\[([\\w:.,?!@#]+(\\.\\[\\w:.,?!@#]+)*+([\\\"\\w:.,?!@#\\\"])*)]").matcher("");
+  private static final Matcher arrayOfTablesExpressionMatcher =
+      Pattern.compile("\\[\\[([\\w:.,?!@#]+(\\.\\[\\w:.,?!@#]+)*+([\\\"\\w:.,?!@#\\\"])*)]]")
+          .matcher("");
   private static final Matcher valueExpressionMatcher =
-      Pattern.compile("([^\\s][\\w:.,?!@#]+)\\s*=(.+)").matcher("");
+      Pattern.compile("([^\\s][A-Za-z0-9_-]|[\\\"\\w:.,?!@#\\\"]+)\\s*=(.+)").matcher("");
 
   private static final Matcher stringValueMatcher = Pattern.compile("^\".*\"$").matcher("");
   private static final Matcher integerValueMatcher = Pattern.compile("^-?\\d+$").matcher("");
   private static final Matcher floatValueMatcher = Pattern.compile("^-?\\d+\\.\\d+?$").matcher("");
   private static final Matcher booleanValueMatcher = Pattern.compile("^(true|false)$").matcher("");
   private static final Matcher dateTimeValueMatcher =
-      Pattern.compile("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z").matcher("");
+      Pattern.compile(
+          "^([\\+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)([\\.,]\\d+(?!:))?)?(\\17[0-5]\\d([\\.,]\\d+)?)?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$")
+          .matcher("");
   private static final Matcher arrayValueMatcher = Pattern.compile("\\[(.*)\\]").matcher("");
 
   public TomlNode parse(String tomlString) throws IOException {
@@ -57,8 +63,8 @@ public class TomlParser {
         continue;
       }
 
-      if (keyGroupExpressionMatcher.reset(line).matches()) {
-        String keyGroupPath = keyGroupExpressionMatcher.group(1);
+      if (tableExpressionMatcher.reset(line).matches()) {
+        String keyGroupPath = tableExpressionMatcher.group(1);
         currentNode = rootNode;
         for (String keyGroup : keyGroupPath.split("\\.")) {
           TomlNode existingNode = currentNode.get(keyGroup);
@@ -73,6 +79,40 @@ public class TomlParser {
 
           currentNode = (TomlHashNode) existingNode;
         }
+      } else if (arrayOfTablesExpressionMatcher.reset(line).matches()) {
+        String keyGroupPath = arrayOfTablesExpressionMatcher.group(1);
+        currentNode = rootNode;
+        String[] keys = keyGroupPath.split("\\.");
+        for (int i = 0; i < keys.length - 1; i++) {
+          String keyGroup = keys[i];
+          TomlNode existingNode = currentNode.get(keyGroup);
+          if (existingNode != null && !existingNode.isArrayOfTables()) {
+            throw new ParseException("Duplicate key found: " + keyGroupPath);
+          }
+
+          if (existingNode == null) {
+            existingNode = new TomlTableArrayNode();
+            currentNode.put(keyGroup, existingNode);
+          }
+
+          currentNode = (TomlHashNode) existingNode;
+        }
+
+        String finalKeyGroup = keys[keys.length - 1];
+        TomlNode existingNode = currentNode.get(finalKeyGroup);
+        if (existingNode != null && !existingNode.isArrayOfTables()) {
+          throw new ParseException("Duplicate key found: " + keyGroupPath);
+        }
+
+        if (existingNode == null) {
+          existingNode = new TomlTableArrayNode();
+          currentNode.put(finalKeyGroup, existingNode);
+        }
+
+        TomlHashNode tableArrayNode = new TomlHashNode();
+        ((TomlTableArrayNode) existingNode).add(tableArrayNode);
+
+        currentNode = (TomlHashNode) tableArrayNode;
       } else if (valueExpressionMatcher.reset(line).matches()) {
         String key = valueExpressionMatcher.group(1);
         String value = valueExpressionMatcher.group(2).trim();
@@ -130,11 +170,7 @@ public class TomlParser {
     } else if (floatValueMatcher.reset(value).matches()) {
       return TomlFloatNode.valueOf(Double.valueOf(value));
     } else if (dateTimeValueMatcher.reset(value).matches()) {
-      try {
-        return TomlDateTimeNode.valueOf(ISO8601.toCalendar(value));
-      } catch (java.text.ParseException e) {
-        throw new ParseException("Invalid date value: " + value);
-      }
+      return TomlDateTimeNode.valueOf(value);
     } else if (arrayValueMatcher.reset(value).matches()) {
       return parseArrayValue(value);
     } else {

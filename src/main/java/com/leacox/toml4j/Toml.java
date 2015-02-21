@@ -1,15 +1,19 @@
 package com.leacox.toml4j;
 
 import com.leacox.toml4j.node.TomlArrayNode;
+import com.leacox.toml4j.node.TomlHashNode;
 import com.leacox.toml4j.node.TomlNode;
+
+import org.joda.time.DateTime;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Toml {
   private final TomlNode rootNode;
@@ -125,18 +129,18 @@ public class Toml {
     return booleanNode.booleanValue();
   }
 
-  public Calendar getCalendar(String key) {
-    TomlNode calendarNode = get(key);
+  public DateTime getDateTime(String key) {
+    TomlNode dateTimeNode = get(key);
 
-    if (calendarNode == null) {
+    if (dateTimeNode == null) {
       return null;
     }
 
-    if (!calendarNode.isDateTime()) {
-      throw new IllegalArgumentException("Matching value of key '" + key + "' is not a Calendar");
+    if (!dateTimeNode.isDateTime()) {
+      throw new IllegalArgumentException("Matching value of key '" + key + "' is not a DateTime");
     }
 
-    return calendarNode.calendarValue();
+    return dateTimeNode.dateTimeValue();
   }
 
   public List<Object> getList(String key) {
@@ -150,7 +154,7 @@ public class Toml {
       return null;
     }
 
-    if (!arrayNode.isArray()) {
+    if (!arrayNode.isArray() && !arrayNode.isArrayOfTables()) {
       throw new IllegalArgumentException("Matching value of key '" + key + "' is not an Array");
     }
 
@@ -211,6 +215,17 @@ public class Toml {
     return list;
   }
 
+  private Map<String, Object> getAsMap(TomlNode node) {
+    TomlHashNode hashNode = (TomlHashNode) node;
+
+    Map<String, Object> map = new HashMap<String, Object>();
+    for (Map.Entry<String, TomlNode> field : hashNode.fields()) {
+      map.put(field.getKey(), getValue(field.getValue()));
+    }
+
+    return map;
+  }
+
   private Object getValue(TomlNode valueNode) {
     Object value = null;
     switch (valueNode.getNodeType()) {
@@ -227,10 +242,13 @@ public class Toml {
         value = valueNode.booleanValue();
         break;
       case DATETIME:
-        value = valueNode.calendarValue();
+        value = valueNode.dateTimeValue();
         break;
       case ARRAY:
         value = getAsList(valueNode);
+        break;
+      case HASH:
+        value = getAsMap(valueNode);
         break;
       default:
         throw new IllegalStateException(

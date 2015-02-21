@@ -84,6 +84,8 @@ public class TomlHashNode extends TomlNode {
       String key = entry.getKey();
       if (node.isValueNode() || node.isArray()) {
         hashBuilder.append(key).append(" = ").append(node.toString()).append("\n");
+      } else if (node.isArrayOfTables()) {
+        hashBuilder.append(generateKeyGroups(key, node));
       } else {
         hashBuilder.append(generateKeyGroups(key, node));
       }
@@ -94,8 +96,7 @@ public class TomlHashNode extends TomlNode {
 
   private StringBuilder generateKeyGroups(String key, TomlNode node) {
     StringBuilder keyGroupBuilder = new StringBuilder();
-    TomlNode currentNode = node;
-    if (currentNode.isHash()) {
+    if (node.isHash()) {
       keyGroupBuilder.append("[").append(key).append("]").append("\n");
       for (Map.Entry<String, TomlNode> child : node.fields()) {
         String childKey = child.getKey();
@@ -106,6 +107,11 @@ public class TomlHashNode extends TomlNode {
         } else {
           keyGroupBuilder.append(generateKeyGroups(key + "." + childKey, childNode));
         }
+      }
+    } else if (node.isArrayOfTables()) {
+      for (TomlNode child : node.children()) {
+        keyGroupBuilder.append("[[").append(key).append("]]").append("\n");
+        keyGroupBuilder.append(child.toString()).append("\n");
       }
     }
 

@@ -3,6 +3,7 @@ package com.leacox.toml4j;
 import com.leacox.toml4j.node.TomlArrayNode;
 import com.leacox.toml4j.node.TomlHashNode;
 import com.leacox.toml4j.node.TomlNode;
+import com.leacox.toml4j.node.TomlTableArrayNode;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -56,8 +57,8 @@ public class TomlGenerator {
         outputStream.write(booleanValue.getBytes(ENCODING));
         break;
       case DATETIME:
-        String calendarValue = ISO8601.fromCalendar(node.calendarValue());
-        outputStream.write(calendarValue.getBytes(ENCODING));
+        String dateTimeValue = node.asStringValue();
+        outputStream.write(dateTimeValue.getBytes(ENCODING));
         break;
       case ARRAY:
         writeArray(outputStream, (TomlArrayNode) node);
@@ -112,9 +113,34 @@ public class TomlGenerator {
             keyGroup == null ? key : new StringBuilder(keyGroup).append(".").append(key)
                 .toString();
         writeHash(outputStream, (TomlHashNode) node, childKeyGroup);
+      } else if (node.isArrayOfTables()) {
+        String childKeyGroup =
+            keyGroup == null ? key : new StringBuilder(keyGroup).append(".").append(key)
+                .toString();
+        writeArrayOfTables(outputStream, (TomlTableArrayNode) node, childKeyGroup);
       }
 
       if (fields.hasNext()) {
+        outputStream.write("\n".getBytes(ENCODING));
+      }
+    }
+  }
+
+  private void writeArrayOfTables(
+      BufferedOutputStream outputStream, TomlTableArrayNode tableArray, String keyGroup)
+      throws IOException {
+    Iterator<TomlNode> children = tableArray.children().iterator();
+    for (; children.hasNext(); ) {
+      TomlNode node = children.next();
+
+      if (keyGroup != null) {
+        String keyGroupLine =
+            new StringBuilder().append("[[").append(keyGroup).append("]]\n").toString();
+        outputStream.write(keyGroupLine.getBytes(ENCODING));
+      }
+      writeHash(outputStream, (TomlHashNode) node);
+
+      if (children.hasNext()) {
         outputStream.write("\n".getBytes(ENCODING));
       }
     }
