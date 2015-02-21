@@ -5,19 +5,19 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class StringUtilsTest {
-	@Test
-	public void testUnescapeStringBasicUnicode() {
-		String value = "\\u00e9";
+  @Test
+  public void testUnescapeStringBasicUnicode() {
+    String value = "\\u00e9";
 
-		String result = StringUtils.unescapeString(value);
+    String result = StringUtils.unescapeString(value);
 
-		assertEquals("é", result);
-	}
+    assertEquals("é", result);
+  }
 
-	@Test(expected = ParseException.class)
-	public void testUnescapeStringThrowsParseExceptionFOrUnicodeControlCharacter() {
-		String value = "\\u0005";
+  @Test(expected = ParseException.class)
+  public void testUnescapeStringThrowsParseExceptionFOrUnicodeControlCharacter() {
+    String value = "\\u0005";
 
-		StringUtils.unescapeString(value);
-	}
+    StringUtils.unescapeString(value);
+  }
 }
