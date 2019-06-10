@@ -25,6 +25,7 @@ public abstract class TomlNode {
     switch (getNodeType()) {
       case HASH:
       case ARRAY:
+      case ARRAY_OF_TABLES:
         return true;
       default:
         return false;
